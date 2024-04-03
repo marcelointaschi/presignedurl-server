@@ -1,0 +1,132 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  presignedurl
+
+  Sample SAM Template for hello-world
+  
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'content-type'"
+      AllowOrigin: "'*'"
+
+Resources:
+  getUploadIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: presignedurl/
+      Handler: getUploadId.lambdaHandler
+      Runtime: nodejs16.x
+      Environment:
+        Variables:
+          region: 'us-east-2'
+      Architectures:
+        - x86_64
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - S3CrudPolicy:
+            BucketName: presignurl
+      Events:
+        getUploadId:
+          Type: Api
+          Properties:
+            Path: /getuploadid
+            Method: get
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        # Sourcemap: true # Enabling source maps will create the required NODE_OPTIONS environment variables on your lambda function during sam build
+        EntryPoints:
+        - getUploadId.ts
+  getUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: presignedurl/
+      Handler: getUrl.lambdaHandler
+      Runtime: nodejs16.x
+      Environment:
+        Variables:
+          region: 'us-east-2'
+      Architectures:
+        - x86_64
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - S3CrudPolicy:
+            BucketName: presignurl
+      Events:
+        getUrl:
+          Type: Api
+          Properties:
+            Path: /geturl
+            Method: get
+    Metadata: 
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        EntryPoints:
+        - getUrl.ts
+  postCompletedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: presignedurl/
+      Handler: postCompleted.lambdaHandler
+      Runtime: nodejs16.x
+      Environment:
+        Variables:
+          region: 'us-east-2'
+      Architectures:
+        - x86_64
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - S3CrudPolicy:
+            BucketName: presignurl
+      Events:
+        postCompleted:
+          Type: Api
+          Properties:
+            Path: /postcompleted
+            Method: post
+    Metadata: 
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        EntryPoints:
+        - postCompleted.ts
+
+Outputs:
+  getUploadIdApi:
+    Description: "API Gateway endpoint URL for Prod stage for getUploadId function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getuploadid/"
+  getUploadIdFunction:
+    Description: get id Lambda Function ARN"
+    Value: !GetAtt getUploadIdFunction.Arn
+  getUploadIdFunctionIamRole:
+    Description: "Implicit IAM Role created for get id function"
+    Value: !GetAtt getUploadIdFunctionRole.Arn
+  getUrlApi:
+    Description: "API Gateway endpoint URL for Prod stage for getUrl function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/geturl/"
+  getUrlFunction:
+    Description: "get url Lambda Function ARN"
+    Value: !GetAtt getUrlFunction.Arn
+  getUrlFunctionIamRole:
+    Description: "Implicit IAM Role created for get url function"
+    Value: !GetAtt getUrlFunctionRole.Arn
+  postCompletedApi:
+    Description: "API Gateway endpoint URL for Prod stage for postCompleted function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/postcompleted/"
+  postCompletedFunction:
+    Description: "post completed Lambda Function ARN"
+    Value: !GetAtt postCompletedFunction.Arn
+  postCompletedFunctionIamRole:
+    Description: "Implicit IAM Role created for post completed function"
+    Value: !GetAtt postCompletedFunctionRole.Arn
